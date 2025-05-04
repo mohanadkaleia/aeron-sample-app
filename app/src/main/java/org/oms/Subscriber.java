@@ -3,6 +3,7 @@ package org.oms;
 import io.aeron.Aeron;
 import io.aeron.Subscription;
 import io.aeron.logbuffer.FragmentHandler;
+import org.oms.OrderMessage;
 
 public class Subscriber {
     public static void run() {
@@ -15,7 +16,9 @@ public class Subscriber {
             FragmentHandler handler = (buffer, offset, length, header) -> {
                 byte[] data = new byte[length];
                 buffer.getBytes(offset, data);
-                System.out.println("📨 Received: " + new String(data));
+
+                OrderMessage order = OrderMessage.fromBytes(data);
+                System.out.println("📨 Received: " + order);
             };
 
             System.out.println("📡 OMS Subscriber running...");

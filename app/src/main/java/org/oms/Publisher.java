@@ -4,6 +4,9 @@ import io.aeron.Aeron;
 import io.aeron.Publication;
 import org.agrona.BufferUtil;
 import org.agrona.concurrent.UnsafeBuffer;
+import java.math.BigDecimal;
+
+import org.oms.OrderMessage;
 
 public class Publisher {
     public static void run() {        
@@ -13,13 +16,16 @@ public class Publisher {
             int STREAM_ID = 1001;
 
             Publication publication = aeron.addPublication(CHANNEL, STREAM_ID);
-            String message = "Hello from OMS Publisher!";
-            UnsafeBuffer buffer = new UnsafeBuffer(BufferUtil.allocateDirectAligned(256, 64));
-            buffer.putBytes(0, message.getBytes());
+            
+            OrderMessage order = new OrderMessage("1", "AAPL", "BUY", new BigDecimal(100), new BigDecimal(100));
+            byte[] orderBytes = order.toBytes();
 
-            long result = publication.offer(buffer, 0, message.length());
+            UnsafeBuffer buffer = new UnsafeBuffer(BufferUtil.allocateDirectAligned(256, 64));
+            buffer.putBytes(0, orderBytes);
+
+            long result = publication.offer(buffer, 0, orderBytes.length);
             if (result > 0) {
-                System.out.println("✅ Published: " + message);
+                System.out.println("✅ Published: " + order);
             } else {
                 System.out.println("❌ Failed to publish. Result: " + result);
             }
